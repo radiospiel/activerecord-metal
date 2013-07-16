@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+require "bundler"
+Bundler.require :development, :test
+
+$: << "#{File.dirname(__FILE__)}/../lib"
+
+require "irb"
+#require "active_record"
+require "active_record/metal"
+
+ActiveRecord::Base.establish_connection(
+  :adapter  => "postgresql",
+  :database => "activerecord_metal"
+)
+
+IRB.start
