@@ -1,6 +1,31 @@
+require "digest/md5"
+
 module ActiveRecord::Metal::Postgresql
   private
 
+  def exec_(sql)
+    pg_conn.exec sql
+  end
+
+  def exec_prepared(name, *args)
+    pg_conn.exec_prepared(name, args)
+  end
+  
+  def prepare_query(sql)
+    name = prepared_statement_name(sql)
+    pg_conn.prepare(name, sql)
+    name
+  end
+  
+  def unprepare_query(sql)
+    name = prepared_statement_name(sql)
+    exec_("DEALLOCATE PREPARE #{name}")
+  end
+  
+  def prepared_statement_name(sql)
+    "pg_metal_#{Digest::MD5.hexdigest(sql)}"
+  end
+  
   def load_pg_types
     Hash.new("_default").tap do |hsh|
       hsh[17] = "bytea"
@@ -14,10 +39,13 @@ module ActiveRecord::Metal::Postgresql
   end
 
   def initialize_implementation
+    @pg_conn = connection.instance_variable_get("@connection")
     @pg_types = load_pg_types
+    
+    exec_("DEALLOCATE PREPARE ALL")
   end
 
-  attr :pg_types
+  attr :pg_types, :pg_conn
 end
 
 require_relative "postgresql/conversions"
@@ -35,9 +63,16 @@ module ActiveRecord::Metal::Postgresql::Queries
 
     attr :columns, :types
     
-    def initialize(metal, sql)
+    def initialize(metal, sql, *args)
       @metal = metal
-      @pg_result = metal.connection.execute(sql)
+      
+      if args.empty?
+        @pg_result = metal.connection.execute(sql)
+      else
+        name = metal.send(:prepare_query, sql)
+        @pg_result = metal.send(:exec_prepared, name, *args)
+        metal.send(:unprepare_query, sql)
+      end
       @current_row = 0
 
       setup_colums
@@ -147,5 +182,20 @@ module ActiveRecord::Metal::Postgresql::Etest
     assert_equal(result, [[1]])
     assert_equal(result.types, [Numeric])
     assert_equal(result.columns, ["number"])
+  end
+
+  def test_null_query
+    expect! metal.ask("SELECT 1 AS number WHERE FALSE") => nil
+    result = metal.exec("SELECT 1 AS number WHERE FALSE")
+    assert_equal(result, [])
+    assert_equal(result.types, [Numeric])
+    assert_equal(result.columns, ["number"])
+  end
+
+  def test_positioned_parameters
+    expect! metal.ask("SELECT 1 AS number WHERE 1=$1", 1) => 1
+    assert_equal metal.exec("SELECT 1 AS number WHERE 1=$1", 1), [[1]]
+    assert_equal metal.exec("SELECT 1 AS value WHERE 1=$1", 1), [[1]]
+    assert_equal metal.exec("SELECT 1 AS value WHERE 1=$1", "1"), [[1]]
   end
 end
