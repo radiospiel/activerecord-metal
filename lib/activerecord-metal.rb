@@ -1,0 +1,1 @@
+require "active-record/metal"
