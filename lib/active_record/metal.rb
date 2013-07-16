@@ -6,12 +6,18 @@ class ActiveRecord::Metal
   def initialize(connection = ActiveRecord::Base.connection)
     @connection = connection
     
-    extend implementations
+    extend implementation
+    
+    initialize_implementation
   end
   
   private
   
-  def implementations
+  # To be overridden by the implementation
+  def initialize_implementation
+  end
+  
+  def implementation
     case connection
     when ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
       require_relative "metal/postgresql"
