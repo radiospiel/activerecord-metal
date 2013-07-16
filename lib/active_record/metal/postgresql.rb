@@ -1,6 +1,23 @@
 require "digest/md5"
 
 module ActiveRecord::Metal::Postgresql
+  def prepare(sql)
+    name = prepared_statement_name(sql)
+    pg_conn.prepare(name, sql)
+    name.to_sym
+  end
+
+  def unprepare(query)
+    expect! query => [ Symbol, String ]
+    case query
+    when Symbol
+      exec_("DEALLOCATE PREPARE #{query}")
+    when String
+      name = prepared_statement_name(query)
+      exec_("DEALLOCATE PREPARE #{name}")
+    end
+  end
+  
   private
 
   # -- raw queries ----------------------------------------------------
@@ -9,19 +26,8 @@ module ActiveRecord::Metal::Postgresql
     pg_conn.exec sql
   end
 
-  def exec_prepared(name, *args)
-    pg_conn.exec_prepared(name, args)
-  end
-  
-  def prepare_query(sql)
-    name = prepared_statement_name(sql)
-    pg_conn.prepare(name, sql)
-    name
-  end
-  
-  def unprepare_query(sql)
-    name = prepared_statement_name(sql)
-    exec_("DEALLOCATE PREPARE #{name}")
+  def exec_prepared(sym, *args)
+    pg_conn.exec_prepared(sym.to_s, args)
   end
   
   def prepared_statement_name(sql)

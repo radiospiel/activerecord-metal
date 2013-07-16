@@ -1,4 +1,3 @@
-
 module ActiveRecord::Metal::Postgresql::Queries
   class Executor < Array
     class Row < Array
@@ -15,12 +14,17 @@ module ActiveRecord::Metal::Postgresql::Queries
     def initialize(metal, sql, *args)
       @metal = metal
       
-      if args.empty?
+      # prepared queries - denoted by symbols - are executed as such, and
+      # not cleaned up. A caller can get a prepared query by calling 
+      # metal.prepare.
+      if sql.is_a?(Symbol)
+        @pg_result = metal.send(:exec_prepared, sql.to_s, *args)
+      elsif args.empty?
         @pg_result = metal.send(:exec_, sql)
       else
-        name = metal.send(:prepare_query, sql)
+        name = metal.prepare(sql)
         @pg_result = metal.send(:exec_prepared, name, *args)
-        metal.send(:unprepare_query, sql)
+        metal.unprepare(sql)
       end
       @current_row = 0
 
