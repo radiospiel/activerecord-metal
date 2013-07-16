@@ -26,6 +26,13 @@ class ActiveRecord::Metal
   end
 end
 
+
+require_relative "metal/transaction"
+
+class ActiveRecord::Metal
+  include Transaction
+end
+
 require "expectation/assertions"
 
 module ActiveRecord::Metal::Etest

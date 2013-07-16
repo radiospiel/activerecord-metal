@@ -16,7 +16,7 @@ module ActiveRecord::Metal::Postgresql::Queries
       @metal = metal
       
       if args.empty?
-        @pg_result = metal.connection.execute(sql)
+        @pg_result = metal.send(:exec_, sql)
       else
         name = metal.send(:prepare_query, sql)
         @pg_result = metal.send(:exec_prepared, name, *args)
