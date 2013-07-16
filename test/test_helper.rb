@@ -10,3 +10,7 @@ ActiveRecord::Base.establish_connection(
   :adapter  => "postgresql",
   :database => "activerecord_metal"
 )
+
+metal = ActiveRecord::Metal.new
+metal.ask "DROP TABLE IF EXISTS test"
+metal.ask "CREATE TABLE test(num INTEGER)"
