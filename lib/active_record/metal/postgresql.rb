@@ -3,6 +3,8 @@ require "digest/md5"
 module ActiveRecord::Metal::Postgresql
   private
 
+  # -- raw queries ----------------------------------------------------
+  
   def exec_(sql)
     pg_conn.exec sql
   end
@@ -25,6 +27,17 @@ module ActiveRecord::Metal::Postgresql
   def prepared_statement_name(sql)
     "pg_metal_#{Digest::MD5.hexdigest(sql)}"
   end
+
+  # -- initialisation -------------------------------------------------
+  
+  attr :pg_types, :pg_conn
+
+  def initialize_implementation
+    @pg_conn = connection.instance_variable_get("@connection")
+    @pg_types = load_pg_types
+    
+    exec_("DEALLOCATE PREPARE ALL")
+  end
   
   def load_pg_types
     Hash.new("_default").tap do |hsh|
@@ -37,15 +50,6 @@ module ActiveRecord::Metal::Postgresql
       end
     end
   end
-
-  def initialize_implementation
-    @pg_conn = connection.instance_variable_get("@connection")
-    @pg_types = load_pg_types
-    
-    exec_("DEALLOCATE PREPARE ALL")
-  end
-
-  attr :pg_types, :pg_conn
 end
 
 require_relative "postgresql/conversions"
