@@ -9,4 +9,6 @@ group :development, :test do
   gem 'debugger'
   gem 'expectation'
   gem 'etest-unit'
+  
+  gem 'pg'
 end

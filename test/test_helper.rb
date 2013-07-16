@@ -1,7 +1,12 @@
 $:.unshift File.expand_path("../../lib", __FILE__)
 
 require "bundler"
-Bundler.setup(:test)
+Bundler.require(:test)
 
 require "active_record/metal"
 require "etest-unit"
+
+ActiveRecord::Base.establish_connection(
+  :adapter  => "postgresql",
+  :database => "activerecord_metal"
+)
