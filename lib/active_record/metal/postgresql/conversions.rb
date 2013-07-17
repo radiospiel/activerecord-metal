@@ -137,20 +137,10 @@ module ActiveRecord::Metal::Postgresql::Conversions::HStore
     return str
   end
 
-  def self.escape_without_type(hsh, connection=ActiveRecord::Base.connection)
-    return unless hsh
-    
-    escaped_hash = hsh.map do |idx, val| 
-      "%s=>%s" % [escape_string(idx), escape_string(val)]
-    end * ","
-  end
-  
   def self.escape(hsh, connection=ActiveRecord::Base.connection)
-    escaped_hash = hsh.map do |idx, val| 
+    hsh.map do |idx, val| 
       "%s=>%s" % [escape_string(idx), escape_string(val)]
     end * ","
-    
-    connection.quote(escaped_hash) + "::hstore"
   end
   
   # Creates a hash from a valid double quoted hstore format, 'cause this is the format

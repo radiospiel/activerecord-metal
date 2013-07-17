@@ -23,10 +23,19 @@ module ActiveRecord::Metal::Postgresql
   # -- raw queries ----------------------------------------------------
   
   def exec_(sql)
+    # STDERR.puts "--> #{sql}"
     pg_conn.exec sql
   end
 
   def exec_prepared(sym, *args)
+    args = args.map do |arg|
+      if arg.is_a?(Hash)
+        ActiveRecord::Metal::Postgresql::Conversions::HStore.escape(arg)
+      else
+        arg
+      end
+    end
+
     pg_conn.exec_prepared(sym.to_s, args)
   end
   

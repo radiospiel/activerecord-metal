@@ -17,4 +17,12 @@ ActiveRecord::Base.establish_connection(
 
 metal = ActiveRecord::Metal.new
 metal.ask "DROP TABLE IF EXISTS test"
-metal.ask "CREATE TABLE test(num INTEGER, num2 INTEGER, str1 VARCHAR)"
+metal.ask <<-SQL
+CREATE TABLE test(
+  id SERIAL PRIMARY KEY, 
+  num INTEGER, 
+  num2 INTEGER, 
+  str1 VARCHAR, 
+  hsh hstore
+)
+SQL
