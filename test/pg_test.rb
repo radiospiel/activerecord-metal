@@ -7,9 +7,9 @@ end
 
 class PostgresTest < Test::Unit::TestCase
   include ActiveRecord::Metal::Etest
-  include ActiveRecord::Metal::EtestBase
   include ActiveRecord::Metal::Transaction::Etest
   include ActiveRecord::Metal::Postgresql::Etest
   include ActiveRecord::Metal::Postgresql::Import::Etest
   include ActiveRecord::Metal::Postgresql::Conversions::Etest
+  include ActiveRecord::Metal::Postgresql::Queries::Etest
 end
