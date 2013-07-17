@@ -12,6 +12,8 @@ module ActiveRecord::Metal::Logging
   end
 
   def log_benchmark(severity, runtime, msg)
+    @benchmark_depth ||= 0
+    return if @benchmark_depth > 0
     return unless logger = SELF.logger
 
     threshold = ActiveRecord::Base.auto_explain_threshold_in_seconds
@@ -30,9 +32,12 @@ module ActiveRecord::Metal::Logging
   end
   
   def benchmark(msg, severity = :info)
+    @benchmark_depth ||= 0
+    @benchmark_depth += 1
     started_at = Time.now
     yield
   ensure
-    log_benchmark severity, runtime, msg
+    @benchmark_depth -= 1
+    log_benchmark severity, Time.now - started_at, msg
   end
 end

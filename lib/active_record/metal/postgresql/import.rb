@@ -5,12 +5,14 @@ module ActiveRecord::Metal::Postgresql::Import
   # In the latter case each record *must* match the order of columns
   # in the table.
   def import(table_name, records, options = {})
-    expect! table_name => /^\S+$/
-    expect! records.first => [ nil, Hash, Array ]
+    benchmark "INSERT #{records.length} records into #{table_name}" do
+      expect! table_name => /^\S+$/
+      expect! records.first => [ nil, Hash, Array ]
 
-    case records.first
-    when Hash   then import_hashes(table_name, records)
-    when Array  then import_arrays(table_name, records, options)
+      case records.first
+      when Hash   then import_hashes(table_name, records)
+      when Array  then import_arrays(table_name, records, options)
+      end
     end
   end
 
