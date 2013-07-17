@@ -28,6 +28,10 @@ GEM
     multi_json (1.7.7)
     pg (0.15.1)
     rake (10.0.4)
+    simplecov (0.7.1)
+      multi_json (~> 1.0)
+      simplecov-html (~> 0.7.1)
+    simplecov-html (0.7.1)
     test-unit (2.5.5)
     tzinfo (0.3.37)
 
@@ -41,3 +45,4 @@ DEPENDENCIES
   expectation
   pg
   rake
+  simplecov

@@ -9,6 +9,7 @@ group :development, :test do
   gem 'debugger'
   gem 'expectation'
   gem 'etest-unit'
+  gem 'simplecov'
   
   gem 'pg'
 end

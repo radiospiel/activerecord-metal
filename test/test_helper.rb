@@ -1,10 +1,14 @@
 $:.unshift File.expand_path("../../lib", __FILE__)
 
 require "bundler"
-Bundler.require(:test)
+Bundler.setup(:test)
+require "simplecov"
+SimpleCov.start do
+  add_filter "test/*.rb"
+end
 
-require "active_record/metal"
 require "etest-unit"
+require "active_record/metal"
 
 ActiveRecord::Base.establish_connection(
   :adapter  => "postgresql",
