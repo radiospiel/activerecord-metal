@@ -54,11 +54,14 @@ module ActiveRecord::Metal::Postgresql
   # -- raw queries ----------------------------------------------------
   
   def exec_(sql)
-    # STDERR.puts "--> #{sql}"
-    pg_conn.exec sql
+    # STDERR.puts "exec_ --> #{sql}"
+    result = pg_conn.exec sql
+    result.check
+    result
   end
 
   def exec_prepared(sym, *args)
+    # STDERR.puts "exec_prepared: #{sym.inspect}"
     args = args.map do |arg|
       if arg.is_a?(Hash)
         ActiveRecord::Metal::Postgresql::Conversions::HStore.escape(arg)
@@ -67,7 +70,9 @@ module ActiveRecord::Metal::Postgresql
       end
     end
 
-    pg_conn.exec_prepared(sym.to_s, args)
+    result = pg_conn.exec_prepared(sym.to_s, args)
+    result.check
+    result
   end
   
   def prepared_statement_name(sql)

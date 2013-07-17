@@ -25,5 +25,10 @@ module ActiveRecord::Metal::Postgresql::Etest
     assert_equal metal.exec("SELECT 1 AS value WHERE 1=$1", 1), [[1]]
     assert_equal metal.exec("SELECT 1 AS value WHERE 1=$1", "1"), [[1]]
   end
+  
+  def test_exceptions
+    assert_raise() {  
+        metal.exec("SELECT 1 FROM unknown")
+    }
+  end
 end
-
