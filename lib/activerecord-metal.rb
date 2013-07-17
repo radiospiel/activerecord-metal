@@ -1,1 +1,1 @@
-require "active-record/metal"
+require "active_record/metal"

@@ -37,9 +37,15 @@ class ActiveRecord::Metal
 end
 
 module ActiveRecord::Metal::EtestBase
-  def self.included(_)
+  SELF = self
+  
+  def self.load_expectation_assertions
     require "expectation/assertions"
     include Expectation::Assertions
+  end
+  
+  def setup
+    SELF.load_expectation_assertions
   end
   
   def metal
