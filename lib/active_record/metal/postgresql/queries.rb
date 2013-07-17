@@ -75,10 +75,11 @@ module ActiveRecord::Metal::Postgresql::Queries
 
       # -- converters -------------------------------------------------
 
-      unescape_bytea = lambda { |s| connection.unescape_bytea(s) }
+      pg_conn = @metal.send(:pg_conn)
+      unescape_bytea = lambda { |s| pg_conn.unescape_bytea(s) }
 
       @converters = pg_types.map do |pg_type|
-        if pg_type == :bytea
+        if pg_type == :_bytea
           unescape_bytea
         else
           Conversions.method(pg_type)

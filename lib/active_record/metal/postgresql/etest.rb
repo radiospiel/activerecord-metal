@@ -1,10 +1,7 @@
+# coding: utf-8
 
 module ActiveRecord::Metal::Postgresql::Etest
-  include Expectation::Assertions
-  
-  def metal
-    @metal ||= ActiveRecord::Metal.new
-  end
+  include ActiveRecord::Metal::EtestBase
   
   def test_initialisation
     # Make sure types are loaded during initialisation
@@ -34,3 +31,4 @@ module ActiveRecord::Metal::Postgresql::Etest
     assert_equal metal.exec("SELECT 1 AS value WHERE 1=$1", "1"), [[1]]
   end
 end
+

@@ -50,12 +50,8 @@ module ActiveRecord::Metal::Postgresql::Import
 end
 
 module ActiveRecord::Metal::Postgresql::Import::Etest
-  include Expectation::Assertions
+  include ActiveRecord::Metal::EtestBase
   
-  def metal
-    @metal ||= ActiveRecord::Metal.new
-  end
-
   # metal.ask "CREATE TABLE test(num INTEGER, num2 INTEGER, str1 VARCHAR)"
 
   def test_import_none

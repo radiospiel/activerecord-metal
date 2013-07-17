@@ -33,18 +33,26 @@ class ActiveRecord::Metal
   include Transaction
 end
 
-require "expectation/assertions"
-
-module ActiveRecord::Metal::Etest
-  include Expectation::Assertions
+module ActiveRecord::Metal::EtestBase
+  def self.included(_)
+    require "expectation/assertions"
+    include Expectation::Assertions
+  end
   
   def metal
     @metal ||= ActiveRecord::Metal.new
   end
-  
+end
+
+module ActiveRecord::Metal::Etest
+  include ActiveRecord::Metal::EtestBase
+
+  def metal
+    @metal ||= ActiveRecord::Metal.new
+  end
+
   def test_pg_connection
     expect! metal.connection => ActiveRecord::ConnectionAdapters::PostgreSQLAdapter
     expect! metal.is_a?(ActiveRecord::Metal::Postgresql)
   end
 end
-
