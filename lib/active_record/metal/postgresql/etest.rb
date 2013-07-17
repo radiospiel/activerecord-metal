@@ -3,11 +3,6 @@
 module ActiveRecord::Metal::Postgresql::Etest
   include ActiveRecord::Metal::EtestBase
   
-  def test_initialisation
-    # Make sure types are loaded during initialisation
-    expect! metal.send(:pg_types).values.include?("_int8")
-  end
-  
   def test_simple_query
     expect! metal.ask("SELECT 1") => 1
     result = metal.exec("SELECT 1 AS number")
