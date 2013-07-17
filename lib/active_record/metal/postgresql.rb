@@ -42,7 +42,10 @@ module ActiveRecord::Metal::Postgresql
     @pg_conn = connection.instance_variable_get("@connection")
     @pg_types = load_pg_types
     
-    exec_("DEALLOCATE PREPARE ALL")
+    exec_ "DEALLOCATE PREPARE ALL"
+    
+    name, installed_version = exec("SELECT name, installed_version FROM pg_available_extensions WHERE name='hstore'").first
+    exec_ "CREATE EXTENSION IF NOT EXISTS hstore" unless installed_version
   end
   
   def load_pg_types
