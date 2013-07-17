@@ -1,10 +1,32 @@
 require "digest/md5"
 
 module ActiveRecord::Metal::Postgresql
-  def prepare(sql)
+  private
+
+  def prepared_statements_by_name
+    @prepared_statements_by_name ||= {}
+  end
+  
+  def prepared_statements
+    @prepared_statements ||= Hash.new { |hsh, sql| hsh[sql] = _prepare(sql) }
+  end
+
+  def resolve_query(query)
+    query.is_a?(Symbol) ? prepared_statements_by_name[query] : query
+  end
+
+  def _prepare(sql)
     name = prepared_statement_name(sql)
     pg_conn.prepare(name, sql)
-    name.to_sym
+    name = name.to_sym
+    prepared_statements_by_name[name] = sql
+    name
+  end
+  
+  public
+  
+  def prepare(sql)
+    prepared_statements[sql]
   end
 
   def unprepare(query)
@@ -12,14 +34,23 @@ module ActiveRecord::Metal::Postgresql
     case query
     when Symbol
       exec_("DEALLOCATE PREPARE #{query}")
+      sql = prepared_statements_by_name.delete query
+      prepared_statements.delete sql
     when String
       name = prepared_statement_name(query)
       exec_("DEALLOCATE PREPARE #{name}")
+      prepared_statements.delete query
+      prepared_statements_by_name.delete name
     end
   end
   
+  def unprepare_all  
+    exec_ "DEALLOCATE PREPARE ALL"
+    @prepared_statements_by_name = @prepared_statements = nil
+  end
+  
   private
-
+  
   # -- raw queries ----------------------------------------------------
   
   def exec_(sql)
@@ -51,7 +82,7 @@ module ActiveRecord::Metal::Postgresql
     @pg_conn = connection.instance_variable_get("@connection")
     @pg_types = load_pg_types
     
-    exec_ "DEALLOCATE PREPARE ALL"
+    unprepare_all
     
     name, installed_version = exec("SELECT name, installed_version FROM pg_available_extensions WHERE name='hstore'").first
     exec_ "CREATE EXTENSION IF NOT EXISTS hstore" unless installed_version
