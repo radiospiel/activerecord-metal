@@ -4,13 +4,13 @@ module ActiveRecord::Metal::Postgresql::Import
   # records is either an Array of Hashes or an Array of Arrays.
   # In the latter case each record *must* match the order of columns
   # in the table.
-  def import(table_name, records)
+  def import(table_name, records, options = {})
     expect! table_name => /^\S+$/
     expect! records.first => [ nil, Hash, Array ]
 
     case records.first
     when Hash   then import_hashes(table_name, records)
-    when Array  then import_arrays(table_name, records)
+    when Array  then import_arrays(table_name, records, options)
     end
   end
 
@@ -35,10 +35,14 @@ module ActiveRecord::Metal::Postgresql::Import
     unprepare(stmt)
   end
   
-  def import_arrays(table_name, records)
+  def import_arrays(table_name, records, options)
+    columns = if options[:columns]
+      "(" + options[:columns].join(",") + ")"
+    end
+    
     values = 1.upto(records.first.length).map { |idx| "$#{idx}" }
 
-    sql = "INSERT INTO #{table_name} VALUES(#{values.join(",")})"
+    sql = "INSERT INTO #{table_name}#{columns} VALUES(#{values.join(",")})"
     stmt = prepare(sql)
     
     records.each do |record|
@@ -62,7 +66,7 @@ module ActiveRecord::Metal::Postgresql::Import::Etest
 
   def test_import_array
     metal.ask "DELETE FROM test"
-    metal.import "test", [[1,2,"one"]]
+    metal.import "test", [[1,2,"one"]], :columns => %w(num num2 str1)
     expect! metal.ask("SELECT COUNT(*) FROM test") => 1
   end
   
