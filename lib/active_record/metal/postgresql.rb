@@ -60,7 +60,9 @@ end
 
 require_relative "postgresql/conversions"
 require_relative "postgresql/queries"
+require_relative "postgresql/import"
 
 module ActiveRecord::Metal::Postgresql
   include Queries
+  include Import
 end

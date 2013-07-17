@@ -13,4 +13,4 @@ ActiveRecord::Base.establish_connection(
 
 metal = ActiveRecord::Metal.new
 metal.ask "DROP TABLE IF EXISTS test"
-metal.ask "CREATE TABLE test(num INTEGER)"
+metal.ask "CREATE TABLE test(num INTEGER, num2 INTEGER, str1 VARCHAR)"
