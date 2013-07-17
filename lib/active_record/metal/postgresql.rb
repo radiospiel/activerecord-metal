@@ -99,6 +99,16 @@ module ActiveRecord::Metal::Postgresql
       end
     end
   end
+  
+  public
+
+  def has_table?(name)
+    ask "SELECT 't'::BOOLEAN FROM pg_tables WHERE tablename=$1", name
+  end
+  
+  def has_index?(name)
+    ask "SELECT 't'::BOOLEAN FROM pg_indexes WHERE indexname=$1", name
+  end
 end
 
 require_relative "postgresql/conversions"
