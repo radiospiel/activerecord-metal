@@ -72,6 +72,8 @@ module ActiveRecord::Metal::Postgresql::Queries
   end
 
   def exec(sql, *args, &block)
+    started_at = Time.now
+    
     # prepared queries - denoted by symbols - are executed as such, and
     # not cleaned up. A caller can get a prepared query by calling 
     # metal.prepare.
@@ -94,6 +96,9 @@ module ActiveRecord::Metal::Postgresql::Queries
     end
 
     ArrayWithTypeInfo.new rows, result.columns, result.types
+  ensure
+    log_benchmark :debug, Time.now - started_at, 
+                  "SQL: {{runtime}} %s %s" % [ sql.is_a?(Symbol) ? "[P]" : "   ", resolve_query(sql) ]
   end
   
   def ask(sql, *args)
@@ -109,3 +114,16 @@ module ActiveRecord::Metal::Postgresql::Queries
     first_row && first_row.first
   end
 end
+
+module ActiveRecord::Metal::Postgresql::Queries::Etest
+  include ActiveRecord::Metal::EtestBase
+
+  def test_benchmark
+    metal.ask("SELECT 1")
+    metal.ask("SELECT 1 WHERE 1=$1", 1)
+    query = metal.prepare("SELECT 1 WHERE 1=$1")
+    metal.ask(query, 1)
+    metal.unprepare(query)
+  end
+end
+

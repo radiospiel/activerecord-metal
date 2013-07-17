@@ -26,11 +26,14 @@ class ActiveRecord::Metal
   end
 end
 
-
+require_relative "metal/logging"
 require_relative "metal/transaction"
 
 class ActiveRecord::Metal
   include Transaction
+  
+  include Logging
+  extend Logging
 end
 
 module ActiveRecord::Metal::EtestBase
