@@ -2,7 +2,7 @@ source "http://rubygems.org"
 
 #gemspec
 
-gem 'activerecord'
+gem 'activerecord', "~> 3.2"
 
 group :development, :test do
   gem 'rake'
