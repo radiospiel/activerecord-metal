@@ -9,16 +9,19 @@ module ActiveRecord::Metal::Postgresql::Import
       expect! table_name => /^\S+$/
       expect! records.first => [ nil, Hash, Array ]
 
-      case records.first
-      when Hash   then import_hashes(table_name, records)
-      when Array  then import_arrays(table_name, records, options)
+      importer = records.first.is_a?(Hash) ? :import_hashes : :import_arrays
+
+      case records.length
+      when 0 then :nop
+      when 1 then               send(importer, table_name, records, options)
+      else        transaction { send(importer, table_name, records, options) }
       end
     end
   end
 
   private
   
-  def import_hashes(table_name, records)
+  def import_hashes(table_name, records, _)
     keys = records.inject([]) do |ary, record|
       ary | record.keys
     end
@@ -33,7 +36,7 @@ module ActiveRecord::Metal::Postgresql::Import
     records.each do |record|
       exec stmt, *record.values_at(*keys)
     end
-
+  ensure
     unprepare(stmt)
   end
   
