@@ -41,7 +41,7 @@ module ActiveRecord::Metal::EtestBase
   
   def self.load_expectation_assertions
     require "expectation/assertions"
-    include Expectation::Assertions
+    extend Expectation::Assertions
   end
   
   def setup
