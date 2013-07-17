@@ -1,31 +1,18 @@
 module ActiveRecord::Metal::Postgresql::Queries
-  class Executor < Array
-    class Row < Array
-      attr :columns, :types
+  class ArrayWithTypeInfo < Array
+    attr :columns, :types
 
-      def initialize(values, columns, types)
-        @columns, @types = columns, types
-        replace(values)
-      end
+    def initialize(values, columns, types)
+      @columns, @types = columns, types
+      replace(values)
     end
+  end
 
+  class Result < Array
     attr :columns, :types
     
-    def initialize(metal, sql, *args)
-      @metal = metal
-      
-      # prepared queries - denoted by symbols - are executed as such, and
-      # not cleaned up. A caller can get a prepared query by calling 
-      # metal.prepare.
-      if sql.is_a?(Symbol)
-        @pg_result = metal.send(:exec_prepared, sql.to_s, *args)
-      elsif args.empty?
-        @pg_result = metal.send(:exec_, sql)
-      else
-        name = metal.prepare(sql)
-        @pg_result = metal.send(:exec_prepared, name, *args)
-        metal.unprepare(sql)
-      end
+    def initialize(metal, pg_result, *args)
+      @metal, @pg_result = metal, pg_result
       @current_row = 0
 
       setup_colums
@@ -41,16 +28,12 @@ module ActiveRecord::Metal::Postgresql::Queries
         data
       end
 
-      create_row(values)
+      ArrayWithTypeInfo.new values, columns, types
     ensure
       @current_row += 1
     end
     
     private
-    
-    def create_row(values)
-      Row.new values, columns, types
-    end
     
     def setup_colums
       @columns = (0 ... @pg_result.nfields).map { |i| @pg_result.fname(i) }
@@ -89,15 +72,28 @@ module ActiveRecord::Metal::Postgresql::Queries
   end
 
   def exec(sql, *args, &block)
-    executor = Executor.new(self, sql, *args)
+    # prepared queries - denoted by symbols - are executed as such, and
+    # not cleaned up. A caller can get a prepared query by calling 
+    # metal.prepare.
+    if sql.is_a?(Symbol)
+      pg_result = exec_prepared(sql, *args)
+    elsif args.empty?
+      pg_result = exec_(sql)
+    else
+      name = prepare(sql)
+      pg_result = exec_prepared(name, *args)
+      unprepare(sql)
+    end
+
+    result = Result.new(self, pg_result, *args)
 
     rows = []
-    while row = executor.next_row
+    while row = result.next_row
       yield row if block
       rows << row
     end
 
-    executor.send :create_row, rows
+    ArrayWithTypeInfo.new rows, result.columns, result.types
   end
   
   def ask(sql, *args)
