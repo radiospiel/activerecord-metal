@@ -29,6 +29,8 @@ end
 
 require "logger"
 
+ENV["ARM_ENV"] = "test"
+
 # ActiveRecord::Base.logger = Logger.new File.open(File.expand_path("../../log/test.log", __FILE__), "w")
 ActiveRecord::Base.logger = Logger.new STDERR
 ActiveRecord::Base.logger.level = Logger::INFO
