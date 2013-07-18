@@ -34,7 +34,7 @@ module ActiveRecord::Metal::Postgresql::Import
     sql = "INSERT INTO #{table_name}(#{keys.join(",")}) VALUES(#{values.join(",")})"
     stmt = prepare(sql)
     records.each do |record|
-      exec stmt, *record.values_at(*keys)
+      exec_prepared stmt, *record.values_at(*keys)
     end
   ensure
     unprepare(stmt)
@@ -51,7 +51,7 @@ module ActiveRecord::Metal::Postgresql::Import
     stmt = prepare(sql)
     
     records.each do |record|
-      exec stmt, *record
+      exec_prepared stmt, *record
     end
   ensure
     unprepare(stmt)
