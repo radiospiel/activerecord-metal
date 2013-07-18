@@ -5,16 +5,17 @@ module ActiveRecord::Metal::Postgresql::Import
   # In the latter case each record *must* match the order of columns
   # in the table.
   def import(table_name, records, options = {})
-    benchmark "INSERT #{records.length} records into #{table_name}" do
+    return if records.empty?
+    importer = records.first.is_a?(Hash) ? :hashes : :arrays
+
+    benchmark "INSERT #{records.length} #{importer} into #{table_name}" do
       expect! table_name => /^\S+$/
       expect! records.first => [ nil, Hash, Array ]
 
-      importer = records.first.is_a?(Hash) ? :import_hashes : :import_arrays
-
       case records.length
       when 0 then :nop
-      when 1 then               send(importer, table_name, records, options)
-      else        transaction { send(importer, table_name, records, options) }
+      when 1 then               send("import_#{importer}", table_name, records, options)
+      else        transaction { send("import_#{importer}", table_name, records, options) }
       end
     end
   end
@@ -36,6 +37,9 @@ module ActiveRecord::Metal::Postgresql::Import
     records.each do |record|
       exec_prepared stmt, *record.values_at(*keys)
     end
+  rescue
+    logger.warn "#{$!.class.name}: #{$!}"
+    raise
   ensure
     unprepare(stmt)
   end
@@ -53,6 +57,9 @@ module ActiveRecord::Metal::Postgresql::Import
     records.each do |record|
       exec_prepared stmt, *record
     end
+  rescue
+    logger.warn "#{$!.class.name}: #{$!}"
+    raise
   ensure
     unprepare(stmt)
   end
