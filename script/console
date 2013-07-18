@@ -4,15 +4,31 @@ Bundler.require :development, :test
 
 $: << "#{File.dirname(__FILE__)}/../lib"
 
-require "irb"
-#require "active_record"
 require "active_record/metal"
 require "active_record/metal/postgresql"
+require "active_record/metal/postgresql/etest"
+
 require "pp"
+
+# -- setup logger -----------------------------------------------------
+
+require "logger"
+
+# ActiveRecord::Base.logger = Logger.new File.open(File.expand_path("../../log/test.log", __FILE__), "w")
+ActiveRecord::Base.logger = Logger.new STDERR
+ActiveRecord::Base.logger.level = Logger::INFO
+
+# -- init AR::B -------------------------------------------------------
 
 ActiveRecord::Base.establish_connection(
   :adapter  => "postgresql",
   :database => "activerecord_metal"
 )
 
+class Alloy < ActiveRecord::Base
+end
+
+# -- start irb --------------------------------------------------------
+
+require "irb"
 IRB.start

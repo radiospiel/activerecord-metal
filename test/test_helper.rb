@@ -13,9 +13,9 @@ ActiveRecord::Base.establish_connection(
 )
 
 metal = ActiveRecord::Metal.new
-metal.ask "DROP TABLE IF EXISTS test"
+metal.ask "DROP TABLE IF EXISTS alloys"
 metal.ask <<-SQL
-CREATE TABLE test(
+CREATE TABLE alloys(
   id SERIAL PRIMARY KEY, 
   num INTEGER, 
   num2 INTEGER, 
@@ -23,6 +23,9 @@ CREATE TABLE test(
   hsh hstore
 )
 SQL
+
+class Alloy < ActiveRecord::Base
+end
 
 require "logger"
 

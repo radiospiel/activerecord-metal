@@ -29,14 +29,14 @@ module ActiveRecord::Metal::Transaction::Etest
   end
   
   def test_transaction
-    expect! metal.ask("SELECT COUNT(*) FROM test") => 0
-    metal.transaction { metal.ask "INSERT INTO test(num) VALUES(1)" }
-    expect! metal.ask("SELECT COUNT(*) FROM test") => 1
+    expect! metal.ask("SELECT COUNT(*) FROM alloys") => 0
+    metal.transaction { metal.ask "INSERT INTO alloys(num) VALUES(1)" }
+    expect! metal.ask("SELECT COUNT(*) FROM alloys") => 1
   end
   
   def test_ro_transaction
-    expect! metal.ask("SELECT COUNT(*) FROM test") => 0
-    metal.transaction(:readonly) { metal.ask "INSERT INTO test(num) VALUES(1)" }
-    expect! metal.ask("SELECT COUNT(*) FROM test") => 0
+    expect! metal.ask("SELECT COUNT(*) FROM alloys") => 0
+    metal.transaction(:readonly) { metal.ask "INSERT INTO alloys(num) VALUES(1)" }
+    expect! metal.ask("SELECT COUNT(*) FROM alloys") => 0
   end
 end

@@ -111,8 +111,8 @@ module ActiveRecord::Metal::Postgresql::Conversions::Etest
   end
   
   def test_hstore_args
-    id = metal.ask "INSERT INTO test(hsh) VALUES($1) RETURNING id", foo: "foo", bar: nil
-    assert_equal metal.ask("SELECT hsh FROM test WHERE id=$1", id), bar: nil, foo: "foo"
+    id = metal.ask "INSERT INTO alloys(hsh) VALUES($1) RETURNING id", foo: "foo", bar: nil
+    assert_equal metal.ask("SELECT hsh FROM alloys WHERE id=$1", id), bar: nil, foo: "foo"
 
 
     result = metal.ask("SELECT 'foo=>foo,bar=>NULL'::hstore WHERE 'foo=>foo,bar=>NULL'::hstore=$1",
