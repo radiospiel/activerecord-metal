@@ -34,6 +34,9 @@ class ActiveRecord::Metal
   
   include Logging
   extend Logging
+  
+  def self.logger; Logging.logger; end
+  def self.logger=(logger); Logging.logger = logger; end
 end
 
 module ActiveRecord::Metal::EtestBase
