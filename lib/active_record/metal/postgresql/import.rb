@@ -37,10 +37,7 @@ module ActiveRecord::Metal::Postgresql::Import
     records.each do |record|
       exec_prepared stmt, *record.values_at(*keys)
     end
-  rescue
-    logger.warn "#{$!.class.name}: #{$!}"
-    raise
-  ensure
+
     unprepare(stmt)
   end
   
@@ -57,10 +54,7 @@ module ActiveRecord::Metal::Postgresql::Import
     records.each do |record|
       exec_prepared stmt, *record
     end
-  rescue
-    logger.warn "#{$!.class.name}: #{$!}"
-    raise
-  ensure
+
     unprepare(stmt)
   end
 end
