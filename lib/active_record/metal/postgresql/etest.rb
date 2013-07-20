@@ -76,4 +76,22 @@ module ActiveRecord::Metal::Postgresql::Etest
     import_performance(100)
     import_performance(10000)
   end
+  
+  def test_timestamp(mode = "with time zone")
+    metal.ask "DROP TABLE IF EXISTS timetable"
+    metal.ask "CREATE TABLE IF NOT EXISTS timetable (name varchar, created_at timestamp #{mode})"
+
+    now = Time.at(Time.now.to_i)
+    back = Time.parse("2010-10-01 12:00:00")
+
+    metal.ask "INSERT INTO timetable VALUES($1, $2)", "now", now
+    metal.ask "INSERT INTO timetable VALUES($1, $2)", "back", back
+
+    expect! metal.ask("SELECT created_at FROM timetable WHERE name=$1", "now") => now
+    expect! metal.ask("SELECT created_at FROM timetable WHERE name=$1", "back") => back
+  end
+
+  def test_timestamp_without_tz
+    test_timestamp "without time zone"
+  end
 end

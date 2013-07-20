@@ -21,7 +21,7 @@ GEM
       debugger-ruby_core_source (~> 1.2.1)
     debugger-linecache (1.2.0)
     debugger-ruby_core_source (1.2.2)
-    etest-unit (0.8.0)
+    etest-unit (0.8.1)
       test-unit
     expectation (0.3.1)
     i18n (0.6.1)

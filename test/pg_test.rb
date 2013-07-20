@@ -13,4 +13,6 @@ class PostgresTest < Test::Unit::TestCase
   include ActiveRecord::Metal::Postgresql::Conversions::Etest
   include ActiveRecord::Metal::Postgresql::Queries::Etest
   include ActiveRecord::Metal::Postgresql::Exec::Etest
+  include ActiveRecord::Metal::Postgresql::PreparedQueries::Etest
+  include ActiveRecord::Metal::Postgresql::Aggregate::Etest
 end
