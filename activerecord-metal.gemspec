@@ -15,7 +15,7 @@ class Gem::Specification
     def group(*args); end
 
     def gem(name, options = {})
-      @scope.add_dependency(name)
+      @scope.add_dependency(name, options)
     end
   end
   
@@ -31,7 +31,7 @@ Gem::Specification.new do |gem|
   gem.author   = "radiospiel"
   gem.email    = "eno@radiospiel.org"
   gem.homepage = "http://github.com/radiospiel/etest"
-  gem.summary  = "Build your tests alongside your code."
+  gem.summary  = "Sometimes you just need SQL."
 
   gem.description = gem.summary
   gem.load_dependencies "Gemfile"
