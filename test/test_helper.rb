@@ -3,6 +3,7 @@ $:.unshift File.expand_path("../../lib", __FILE__)
 require "bundler"
 Bundler.setup(:test)
 require "simplecov"
+SimpleCov.start
 
 require "etest-unit"
 require "active_record/metal"
