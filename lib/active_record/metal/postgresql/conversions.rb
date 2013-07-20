@@ -72,6 +72,10 @@ module ActiveRecord::Metal::Postgresql::Conversions::Time
   def _timestamptz(s)
     T.parse(s)
   end
+  
+  def _interval(s)
+    raise "ActiveRecord::Metal does not yet support the type '_interval': #{s.inspect}"
+  end
 end
 
 module ActiveRecord::Metal::Postgresql::Conversions::Boolean

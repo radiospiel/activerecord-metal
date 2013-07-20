@@ -46,6 +46,26 @@ So there is support for queries.
     # only what is the database's default; and Postgresql uses $1, $2, ...
     metal.exec("SELECT id, name FROM users WHERE name=$1", "me")
 
+## Usage - prepared queries
+
+ActiveRecord::Metal uses prepared queries whenever a query uses parameters. They
+are managed automatically behind your back. You can also explicitely prepare
+queries:
+
+    prepared_query = metal.prepare(sql)
+
+and use the prepared_query instead of the sql string.
+
+    metal.ask prepared_query, arg1, arg2, ...
+
+To unprepare the query use 
+
+    metal.unprepare(prepared_query)
+    metal.unprepare(sql)
+
+**Note:** ActiveRecord::Metal currently does not automatically unprepare
+queries.
+
 ## Usage - Mass import
 
     # Mass imports for array records
@@ -73,14 +93,11 @@ So there is support for queries.
 
 ### How fast is the mass import?
 
-The metal's importer is faster than ActiveRecord::Base's, because:
+The metal's importer is fast, ceause it just does importing data - that 
+means it does not fetch ids, it does not validate records, does not call
+callbacks.
 
-- it is using one prepared statement per import session, as (AFAIK, again)
-  one prepared statement per individual record
-- it does not fetch ids etc.
-- it does not do all the rails shananiggins: no 
-  
-Hmm, lets see: (Note: This is on a Macbook Air w/Ruby 1.9.2 and activerecord 2.3 - YMMV)
+This results in an impressive speedup compared to ActiveRecord::Base:
 
     1.9.2 ~/projects/gem/activerecord-metal[master] > bundle exec script/console 
     Loaded /Users/eno/.irbrc
@@ -121,6 +138,13 @@ And documentation is still missing. Code coverage is good, though:
     All Files (97.22% covered at 88.78 hits/line)
     6 files in total. 288 relevant lines. 280 lines covered and 8 lines missed
 
+## Hacking ActiveRecord::Metal
+
+The following gives you a IRB console
+
+    bundle exec script/console
+
 ## License
 
 The activerecord-metal gem is distributed under the terms of the Modified BSD License, see LICENSE.BSD for details.
+
