@@ -40,4 +40,16 @@ module ActiveRecord::Metal::Logging
     @benchmark_depth -= 1
     log_benchmark severity, Time.now - started_at, msg
   end
+  
+  private
+  
+  def log_error(exception, query, *args)
+    unless args.empty?
+      args = "w/#{args.map(&:inspect).join(", ")}"
+    else
+      args = ""
+    end
+
+    ActiveRecord::Metal.logger.error "#{exception} on #{resolve_query(query)} #{args}"
+  end
 end

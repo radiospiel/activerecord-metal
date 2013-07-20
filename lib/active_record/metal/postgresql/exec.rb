@@ -4,13 +4,10 @@ module ActiveRecord::Metal::Postgresql::Exec
   # -- raw queries ----------------------------------------------------
 
   def exec_(sql)
-    # STDERR.puts "exec_ --> #{sql}"
-    result = pg_conn.exec(sql)
-    check result, sql
+    pg_conn.exec(sql)
   end
 
   def exec_prepared(sym, *args)
-    # STDERR.puts "exec_prepared: #{sym.inspect}"
     args = args.map do |arg|
       if arg.is_a?(Hash)
         ActiveRecord::Metal::Postgresql::Conversions::HStore.escape(arg)
@@ -19,21 +16,34 @@ module ActiveRecord::Metal::Postgresql::Exec
       end
     end
 
-    result = pg_conn.exec_prepared(sym.to_s, args)
-    check result, sym, *args
+    pg_conn.exec_prepared(sym.to_s, args)
+  end
+end
+
+module ActiveRecord::Metal::Postgresql::Exec::Etest
+  include ActiveRecord::Metal::EtestBase
+
+  def test_error_on_prepare
+    assert_raise(PG::Error) {  
+      metal.prepare "SELECT unknown_function(1)"
+    }
   end
 
-  def check(result, query, *args)
-    result.check
-    result
-  rescue 
-    unless args.empty?
-      args = "w/#{args.map(&:inspect).join(", ")}"
-    else
-      args = ""
-    end
+  def test_error_on_exec
+    assert_raise(PG::Error) {  
+      metal.ask "SELECT unknown_function(1)"
+    }
+  end
 
-    ActiveRecord::Metal.logger.error "#{$!.class.name}: #{$!} on #{resolve_query(query)} #{args}"
-    raise
+  def test_error_on_unprepare
+    assert_raise(PG::Error) {  
+      metal.unprepare "SELECT unknown_function(1)"
+    }
+  end
+
+  def test_error_on_exec_with_args
+    assert_raise(PG::Error) {  
+      metal.ask "SELECT num FROM alloys WHERE unknown_function(id) > $1", 1
+    }
   end
 end

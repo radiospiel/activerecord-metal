@@ -96,6 +96,9 @@ module ActiveRecord::Metal::Postgresql::Queries
     end
 
     ArrayWithTypeInfo.new rows, result.columns, result.types
+  rescue PG::Error
+    log_error $!, sql, *args
+    raise
   ensure
     log_benchmark :debug, Time.now - started_at, 
                   "SQL: {{runtime}} %s %s" % [ sql.is_a?(Symbol) ? "[P]" : "   ", resolve_query(sql) ]

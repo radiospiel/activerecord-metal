@@ -1,6 +1,9 @@
 module ActiveRecord::Metal::Postgresql::PreparedQueries
   def prepare(sql)
     prepared_statements[sql]
+  rescue PG::Error
+    log_error $!, sql
+    raise
   end
 
   def unprepare(query)
@@ -16,6 +19,9 @@ module ActiveRecord::Metal::Postgresql::PreparedQueries
       prepared_statements.delete query
       prepared_statements_by_name.delete name
     end
+  rescue PG::Error
+    log_error $!, query
+    raise
   end
 
   private
