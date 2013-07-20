@@ -43,7 +43,8 @@ require_relative "postgresql/queries"
 require_relative "postgresql/prepared_queries"
 require_relative "postgresql/exec"
 require_relative "postgresql/import"
+require_relative "postgresql/aggregate"
 
 module ActiveRecord::Metal::Postgresql
-  include Queries, PreparedQueries, Exec, Import
+  include Queries, PreparedQueries, Exec, Import, Aggregate
 end

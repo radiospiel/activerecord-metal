@@ -54,6 +54,10 @@ module ActiveRecord::Metal::EtestBase
   def metal
     @metal ||= ActiveRecord::Metal.new
   end
+  
+  def count(table)
+    metal.ask("SELECT COUNT(*) FROM #{table}")
+  end
 end
 
 module ActiveRecord::Metal::Etest
