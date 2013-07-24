@@ -36,6 +36,18 @@ module ActiveRecord::Metal::Postgresql
   def has_index?(name)
     ask "SELECT 't'::BOOLEAN FROM pg_indexes WHERE indexname=$1", name
   end
+  
+  def columns
+    columns = exec("SELECT attname FROM pg_attribute , pg_type WHERE typrelid=attrelid AND typname=$1", table_name).map(&:first)
+    
+    columns -= %w(tableoid cmax xmax cmin xmin ctid oid)
+    columns.select { |column| column !~ /^\.\.\.\.\.\.\.\.pg\.dropped/ }
+  end
+  
+  def has_column?(name)
+    expect! name => String
+    columns.include?(name)
+  end
 end
 
 require_relative "postgresql/conversions"
