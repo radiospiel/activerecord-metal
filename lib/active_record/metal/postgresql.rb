@@ -37,16 +37,16 @@ module ActiveRecord::Metal::Postgresql
     ask "SELECT 't'::BOOLEAN FROM pg_indexes WHERE indexname=$1", name
   end
   
-  def columns
+  def columns(table_name)
     columns = exec("SELECT attname FROM pg_attribute , pg_type WHERE typrelid=attrelid AND typname=$1", table_name).map(&:first)
     
     columns -= %w(tableoid cmax xmax cmin xmin ctid oid)
     columns.select { |column| column !~ /^\.\.\.\.\.\.\.\.pg\.dropped/ }
   end
   
-  def has_column?(name)
+  def has_column?(table_name, name)
     expect! name => String
-    columns.include?(name)
+    columns(table_name).include?(name)
   end
 end
 
