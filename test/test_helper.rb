@@ -13,7 +13,13 @@ ActiveRecord::Base.establish_connection(
   :database => "activerecord_metal"
 )
 
-metal = ActiveRecord::Metal.new
+metal = begin
+  ActiveRecord::Metal.new
+rescue ActiveRecord::NoDatabaseError
+  STDERR.puts "[ERR] Make sure there is a database 'activerecord_metal' on the current postgresql connection."
+  exit 0
+end
+
 metal.ask "DROP TABLE IF EXISTS alloys"
 metal.ask <<-SQL
 CREATE TABLE alloys(
