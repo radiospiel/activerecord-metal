@@ -16,12 +16,6 @@ module ActiveRecord::Metal::Logging
     return if @benchmark_depth > 0
     return unless logger = SELF.logger
 
-    threshold = ActiveRecord::Base.auto_explain_threshold_in_seconds
-    if threshold
-      return if runtime < threshold
-      severity = :info if severity == :debug
-    end
-
     runtime = "%.1f msecs" % (runtime * 1000)
 
     unless msg.gsub!(/\{\{runtime\}\}/, runtime)
