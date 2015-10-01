@@ -12,7 +12,17 @@ module ActiveRecord::Metal::Postgresql
     # unprepare_all
     
     name, installed_version = exec("SELECT name, installed_version FROM pg_available_extensions WHERE name='hstore'").first
-    exec_ "CREATE EXTENSION IF NOT EXISTS hstore" unless installed_version
+    unless installed_version
+      begin
+        exec_ "CREATE EXTENSION IF NOT EXISTS hstore"
+      rescue PG::InsufficientPrivilege
+        STDERR.puts <<-MSG
+*** Note: we cannot find nor install postgresql's hstore extension. This is not a problem 
+unless you need it - in which case you either ask the database admin to install it or to 
+give you pivilege to do so yourself. You have been warned.
+  MSG
+      end
+    end
   end
   
   def load_pg_types
